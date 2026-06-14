@@ -27,17 +27,17 @@ else
 
     if not _G.PassData then _G.PassData = {LastUnlocked = 0} end
 
-    -- 新ネオンカラーテーマ
+    -- ネオンテーマカラー
     local c_bg = Color3.fromRGB(20, 20, 25)
     local c_card = Color3.fromRGB(30, 30, 38)
     local c_accent = Color3.fromRGB(0, 200, 255)
     local c_off = Color3.fromRGB(255, 75, 75)
     local c_text = Color3.fromRGB(240, 240, 245)
 
-    local speed = 16
-    local custom = 60
-    local isF, isFly, isGod, isOpen = false, false, false, true
-    local bV, bG, rC, gC = nil, nil, nil, nil
+    -- フライト速度を300固定
+    local flySpeed = 300
+    local isFly, isOpen = false, true
+    local bV, bG, rC = nil, nil, nil
 
     local sg = Instance.new("ScreenGui")
     sg.Name = "DeltaNeonPanel"
@@ -64,7 +64,7 @@ else
         btn.BackgroundColor3 = c_card
         btn.TextColor3 = c_text
         btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 14
+        btn.TextSize = 13
         btn.BorderSizePixel = 0
         btn.Parent = parent
         local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 6) uc.Parent = btn
@@ -73,9 +73,11 @@ else
     end
 
     local function start()
+        -- メインUI（横幅を110に狭め、位置を中央[0.5, 0.5]へ配置）
         local mf = Instance.new("Frame")
-        mf.Size = UDim2.new(0, 160, 0, 280)
-        mf.Position = UDim2.new(1, -180, 0.5, -140)
+        mf.Size = UDim2.new(0, 110, 0, 160)
+        mf.AnchorPoint = Vector2.new(0.5, 0.5)
+        mf.Position = UDim2.new(0.5, 0, 0.5, 0)
         mf.BackgroundColor3 = c_bg
         mf.BorderSizePixel = 0
         mf.Parent = sg
@@ -86,37 +88,14 @@ else
 
         local title = Instance.new("TextLabel")
         title.Size = UDim2.new(1, 0, 0, 35)
-        title.Text = "RIMU PANEL v2"
+        title.Text = "RIMU FLY"
         title.TextColor3 = c_accent
         title.Font = Enum.Font.GothamBlack
-        title.TextSize = 14
+        title.TextSize = 13
         title.BackgroundTransparency = 1
         title.Parent = mf
 
-        local sb = createStyledButton("SPEED: OFF", UDim2.new(0, 10, 0, 45), UDim2.new(0, 140, 0, 35), mf)
-        sb.UIStroke.Color = c_off
-
-        local function upS()
-            if isF then
-                if h then h.WalkSpeed = custom end
-                sb.Text = "SPEED: " .. custom
-                sb.UIStroke.Color = c_accent
-            else
-                if h then h.WalkSpeed = speed end
-                sb.Text = "SPEED: OFF"
-                sb.UIStroke.Color = c_off
-            end
-        end
-
-        sb.MouseButton1Click:Connect(function() isF = not isF upS() end)
-
-        local pb = createStyledButton("+10", UDim2.new(0, 10, 0, 85), UDim2.new(0, 65, 0, 30), mf)
-        local mb = createStyledButton("-10", UDim2.new(0, 85, 0, 85), UDim2.new(0, 65, 0, 30), mf)
-
-        pb.MouseButton1Click:Connect(function() custom = math.min(custom + 10, 300) upS() end)
-        mb.MouseButton1Click:Connect(function() custom = math.max(custom - 10, 16) upS() end)
-
-        local fb = createStyledButton("FLY: OFF", UDim2.new(0, 10, 0, 125), UDim2.new(0, 140, 0, 35), mf)
+        local fb = createStyledButton("FLY: OFF", UDim2.new(0, 10, 0, 45), UDim2.new(0, 90, 0, 40), mf)
         fb.UIStroke.Color = c_off
 
         local function stopF()
@@ -141,7 +120,7 @@ else
                     local md = h.MoveDirection
                     local fV = Vector3.new(0, 0, 0)
                     if md.Magnitude > 0 then fV = cam.CFrame.LookVector * md.Magnitude end
-                    bV.velocity = fV.Magnitude > 0 and fV.Unit * custom or Vector3.new(0,0,0)
+                    bV.velocity = fV.Magnitude > 0 and fV.Unit * flySpeed or Vector3.new(0,0,0)
                     bG.cframe = cam.CFrame
                 end)
                 fb.Text = "FLY: ON"
@@ -151,49 +130,23 @@ else
             end
         end)
 
-        local gb = createStyledButton("GOD: OFF", UDim2.new(0, 10, 0, 175), UDim2.new(0, 140, 0, 35), mf)
-        gb.UIStroke.Color = c_off
-
-        local function stopG()
-            isGod = false
-            if gC then gC:Disconnect() gC = nil end
-            gb.Text = "GOD: OFF"
-            gb.UIStroke.Color = c_off
-        end
-
-        gb.MouseButton1Click:Connect(function()
-            isGod = not isGod
-            if isGod then
-                gb.Text = "GOD: ON"
-                gb.UIStroke.Color = c_accent
-                -- 【強化版：首ジョイント切断による完全当たり判定除去ゴッドモード】
-                -- クライアント側で一瞬だけHumanoidの記述を狂わせ、ゲームサーバーからの「ダメージ判定」をすり抜ける仕様
-                if h then
-                    gC = game:GetService("RunService").Heartbeat:Connect(function()
-                        if isGod and h and character:FindFirstChild("Head") then
-                            local neck = character.Head:FindFirstChild("Neck")
-                            if neck then neck.Parent = nil end
-                        end
-                    end)
-                end
-            else
-                stopG()
-            end
-        end)
-
+        -- 視認性を高めたクローズボタン
         local tmb = Instance.new("TextButton")
-        tmb.Size = UDim2.new(0, 60, 0, 30)
-        tmb.Position = UDim2.new(0.5, -30, 0, 235)
+        tmb.Size = UDim2.new(0, 90, 0, 30)
+        tmb.Position = UDim2.new(0, 10, 0, 105)
         tmb.Text = "CLOSE"
-        tmb.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        tmb.TextColor3 = Color3.fromRGB(180, 180, 190)
+        tmb.BackgroundColor3 = Color3.fromRGB(50, 53, 65)
+        tmb.TextColor3 = Color3.fromRGB(255, 255, 255)
         tmb.Font = Enum.Font.GothamBold
-        tmb.TextSize = 11
+        tmb.TextSize = 12
         tmb.BorderSizePixel = 0
         tmb.Parent = mf
         local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(0, 6) tc.Parent = tmb
+        local ts = Instance.new("UIStroke") ts.Color = Color3.fromRGB(100, 105, 120) ts.Thickness = 1 ts.Parent = tmb
 
-        local openBtn = createStyledButton("OPEN", UDim2.new(1, -75, 0.5, -20), UDim2.new(0, 65, 0, 35), sg)
+        -- 画面中央よりにポップアップするオープンボタン
+        local openBtn = createStyledButton("OPEN", UDim2.new(0.5, 40, 0.5, 0), UDim2.new(0, 65, 0, 35), sg)
+        openBtn.AnchorPoint = Vector2.new(0.5, 0.5)
         openBtn.Visible = false
         openBtn.UIStroke.Color = c_accent
         makeDraggable(openBtn)
@@ -208,24 +161,23 @@ else
             mf.Visible = true
         end)
 
-        -- 【リクエスト機能】プレイヤーが死んだら、すべてのトグルを完全にデフォルト（OFF）に戻す
+        -- プレイヤー死亡時にトグルを初期化（OFF）
         p.CharacterAdded:Connect(function(nC)
             character = nC
             h = character:WaitForChild("Humanoid")
             r = character:WaitForChild("HumanoidRootPart")
             stopF()
-            stopG()
-            isF = false
-            upS()
             mf.Visible = true
             openBtn.Visible = false
         end)
     end
 
     local function ask()
+        -- パスワード画面を中央に配置
         local pf = Instance.new("Frame")
         pf.Size = UDim2.new(0, 260, 0, 150)
-        pf.Position = UDim2.new(0.5, -130, 0.4, -75)
+        pf.AnchorPoint = Vector2.new(0.5, 0.5)
+        pf.Position = UDim2.new(0.5, 0, 0.5, 0)
         pf.BackgroundColor3 = c_bg
         pf.Parent = sg
         local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 12) uc.Parent = pf
