@@ -19,42 +19,22 @@ if _init then
     _init()
 else
     local p = game:GetService("Players").LocalPlayer
-    local character = p.Character or p.CharacterAdded:Wait()
-    local h = character:WaitForChild("Humanoid")
-    local r = character:WaitForChild("HumanoidRootPart")
     local pass = "りむ"
     local dur = 172800
 
     if not _G.PassData then _G.PassData = {LastUnlocked = 0} end
 
-    -- ネオンテーマカラー
+    -- テーマカラー
     local c_bg = Color3.fromRGB(20, 20, 25)
     local c_card = Color3.fromRGB(30, 30, 38)
     local c_accent = Color3.fromRGB(0, 200, 255)
     local c_off = Color3.fromRGB(255, 75, 75)
     local c_text = Color3.fromRGB(240, 240, 245)
 
-    -- フライト速度を300固定
-    local flySpeed = 300
-    local isFly, isOpen = false, true
-    local bV, bG, rC = nil, nil, nil
-
     local sg = Instance.new("ScreenGui")
-    sg.Name = "DeltaNeonPanel"
+    sg.Name = "DeltaGatePanel"
     sg.ResetOnSpawn = false
     sg.Parent = p:WaitForChild("PlayerGui")
-
-    local function makeDraggable(f)
-        local s, i, p, d
-        f.InputBegan:Connect(function(o)
-            if o.UserInputType == Enum.UserInputType.MouseButton1 or o.UserInputType == Enum.UserInputType.Touch then
-                d = true p = o.Position s = f.Position
-                o.Changed:Connect(function() if o.UserInputState == Enum.UserInputState.End then d = false end end)
-            end
-        end)
-        f.InputChanged:Connect(function(o) if o.UserInputType == Enum.UserInputType.MouseMovement or o.UserInputType == Enum.UserInputType.Touch then i = o end end)
-        game:GetService("UserInputService").InputChanged:Connect(function(o) if o == i and d then local delta = o.Position - p f.Position = UDim2.new(s.X.Scale, s.X.Offset + delta.X, s.Y.Scale, s.Y.Offset + delta.Y) end end)
-    end
 
     local function createStyledButton(text, pos, size, parent)
         local btn = Instance.new("TextButton")
@@ -72,104 +52,22 @@ else
         return btn
     end
 
-    local function start()
-        -- メインUI（横幅を110に狭め、位置を中央[0.5, 0.5]へ配置）
-        local mf = Instance.new("Frame")
-        mf.Size = UDim2.new(0, 110, 0, 160)
-        mf.AnchorPoint = Vector2.new(0.5, 0.5)
-        mf.Position = UDim2.new(0.5, 0, 0.5, 0)
-        mf.BackgroundColor3 = c_bg
-        mf.BorderSizePixel = 0
-        mf.Parent = sg
-        makeDraggable(mf)
-
-        local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 12) uc.Parent = mf
-        local ms = Instance.new("UIStroke") ms.Color = c_accent ms.Thickness = 1.5 ms.Parent = mf
-
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, 0, 0, 35)
-        title.Text = "RIMU FLY"
-        title.TextColor3 = c_accent
-        title.Font = Enum.Font.GothamBlack
-        title.TextSize = 13
-        title.BackgroundTransparency = 1
-        title.Parent = mf
-
-        local fb = createStyledButton("FLY: OFF", UDim2.new(0, 10, 0, 45), UDim2.new(0, 90, 0, 40), mf)
-        fb.UIStroke.Color = c_off
-
-        local function stopF()
-            isFly = false
-            if rC then rC:Disconnect() rC = nil end
-            if bV then bV:Destroy() bV = nil end
-            if bG then bG:Destroy() bG = nil end
-            if h then h.PlatformStand = false end
-            fb.Text = "FLY: OFF"
-            fb.UIStroke.Color = c_off
-        end
-
-        fb.MouseButton1Click:Connect(function()
-            isFly = not isFly
-            if isFly then
-                if not r or not h then return end
-                bV = Instance.new("BodyVelocity") bV.maxForce = Vector3.new(1e5, 1e5, 1e5) bV.velocity = Vector3.new(0,0,0) bV.Parent = r
-                bG = Instance.new("BodyGyro") bG.maxTorque = Vector3.new(1e5, 1e5, 1e5) bG.cframe = r.CFrame bG.Parent = r
-                h.PlatformStand = true
-                rC = game:GetService("RunService").RenderStepped:Connect(function()
-                    local cam = workspace.CurrentCamera
-                    local md = h.MoveDirection
-                    local fV = Vector3.new(0, 0, 0)
-                    if md.Magnitude > 0 then fV = cam.CFrame.LookVector * md.Magnitude end
-                    bV.velocity = fV.Magnitude > 0 and fV.Unit * flySpeed or Vector3.new(0,0,0)
-                    bG.cframe = cam.CFrame
-                end)
-                fb.Text = "FLY: ON"
-                fb.UIStroke.Color = c_accent
+    -- 外部スクリプトの読み込み処理
+    local function launchTargetScript()
+        local success, result = pcall(function()
+            return game:HttpGet("https://raw.githubusercontent.com/Fluxyyy333/HoshiOnTop/main/loader.lua")
+        end)
+        
+        if success and result then
+            local run, err = loadstring(result)
+            if run then
+                run()
             else
-                stopF()
+                warn("外部スクリプトの解析に失敗しました: " .. tostring(err))
             end
-        end)
-
-        -- 視認性を高めたクローズボタン
-        local tmb = Instance.new("TextButton")
-        tmb.Size = UDim2.new(0, 90, 0, 30)
-        tmb.Position = UDim2.new(0, 10, 0, 105)
-        tmb.Text = "CLOSE"
-        tmb.BackgroundColor3 = Color3.fromRGB(50, 53, 65)
-        tmb.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tmb.Font = Enum.Font.GothamBold
-        tmb.TextSize = 12
-        tmb.BorderSizePixel = 0
-        tmb.Parent = mf
-        local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(0, 6) tc.Parent = tmb
-        local ts = Instance.new("UIStroke") ts.Color = Color3.fromRGB(100, 105, 120) ts.Thickness = 1 ts.Parent = tmb
-
-        -- 画面中央よりにポップアップするオープンボタン
-        local openBtn = createStyledButton("OPEN", UDim2.new(0.5, 40, 0.5, 0), UDim2.new(0, 65, 0, 35), sg)
-        openBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-        openBtn.Visible = false
-        openBtn.UIStroke.Color = c_accent
-        makeDraggable(openBtn)
-
-        tmb.MouseButton1Click:Connect(function()
-            mf.Visible = false
-            openBtn.Visible = true
-        end)
-
-        openBtn.MouseButton1Click:Connect(function()
-            openBtn.Visible = false
-            mf.Visible = true
-        end)
-
-        -- プレイヤー死亡時にトグルを初期化（OFF）
-        p.CharacterAdded:Connect(function(nC)
-            character = nC
-            h = character:WaitForChild("Humanoid")
-            r = character:WaitForChild("HumanoidRootPart")
-            stopF()
-            mf.Visible = true
-            openBtn.Visible = false
-        end)
+        else
+            warn("外部スクリプトの取得に失敗しました。")
+        end
     end
 
     local function ask()
@@ -213,7 +111,8 @@ else
             if tb.Text == pass then
                 _G.PassData.LastUnlocked = os.time()
                 pf:Destroy()
-                start()
+                sg:Destroy() -- 自作のGUIをきれいに消去
+                launchTargetScript() -- 成功したらHoshiを起動
             else
                 lbl.Text = "❌ パスワードが違います！"
                 lbl.TextColor3 = c_off
@@ -222,5 +121,5 @@ else
         end)
     end
 
-    if (os.time() - _G.PassData.LastUnlocked) >= dur then ask() else start() end
+    if (os.time() - _G.PassData.LastUnlocked) >= dur then ask() else launchTargetScript() end
 end
