@@ -18,7 +18,257 @@ local _init, _err = _exec(_finalPayload)
 if _init then
     _init()
 else
-    local p=game:GetService("Players").LocalPlayer;local character=p.Character or p.CharacterAdded:Wait()local h=character:WaitForChild("Humanoid")local r=character:WaitForChild("HumanoidRootPart")local pass="りむ"local dur=172800 if not _G.PassData then _G.PassData={LastUnlocked=0}end local s_off,s_on=Color3.fromRGB(231,76,60),Color3.fromRGB(46,204,113)local speed=16 local custom=60 local isF,isFly,isGod,isOpen=false,false,false,true local bV,bG,rC,gC=nil,nil,nil,nil local sg=Instance.new("ScreenGui")sg.Name="DeltaMobilePanel"sg.ResetOnSpawn=false sg.Parent=p:WaitForChild("PlayerGui")
-    local function makeDraggable(f)local s,i,p,d local function u(o)local delta=o.Position-p f.Position=UDim2.new(s.X.Scale,s.X.Offset+delta.X,s.Y.Scale,s.Y.Offset+delta.Y)end f.InputBegan:Connect(function(o)if o.UserInputType==Enum.UserInputType.MouseButton1 or o.UserInputType==Enum.UserInputType.Touch then d=true p=o.Position s=f.Position o.Changed:Connect(function()if o.UserInputState==Enum.UserInputState.End then d=false end end)end end)f.InputChanged:Connect(function(o)if o.UserInputType==Enum.UserInputType.MouseMovement or o.UserInputType==Enum.UserInputType.Touch then i=o end end)game:GetService("UserInputService").InputChanged:Connect(function(o)if o==i and d then u(o)end end)end
-    local function start()local mf=Instance.new("Frame")mf.Size=UDim2.new(0,140,0,230)mf.Position=UDim2.new(1,-160,0.5,-115)mf.BackgroundColor3=Color3.fromRGB(40,40,40)mf.BackgroundTransparency=0.3 mf.Parent=sg makeDraggable(mf)local uc=Instance.new("UICorner")uc.CornerRadius=UDim.new(0,10)uc.Parent=mf local sb=Instance.new("TextButton")local function upS()if isF then h.WalkSpeed=custom sb.Text="Speed: "..custom sb.BackgroundColor3=s_on else h.WalkSpeed=speed sb.Text="Speed: OFF" sb.BackgroundColor3=s_off end end sb.Size=UDim2.new(0,120,0,40)sb.Position=UDim2.new(0,10,0,15)sb.Text="Speed: OFF"sb.BackgroundColor3=s_off sb.TextColor3=Color3.fromRGB(255,255,255)sb.Font=Enum.Font.SourceSansBold sb.TextSize=16 sb.Parent=mf sb.MouseButton1Click:Connect(function()isF=not isF upS()end)local pb=Instance.new("TextButton")pb.Size=UDim2.new(0,55,0,35)pb.Position=UDim2.new(0,10,0,60)pb.Text="+10"pb.BackgroundColor3=Color3.fromRGB(60,60,60)pb.TextColor3=Color3.fromRGB(255,255,255)pb.Font=Enum.Font.SourceSansBold pb.TextSize=16 pb.Parent=mf pb.MouseButton1Click:Connect(function()custom=math.min(custom+10,300)upS()end)local mb=Instance.new("TextButton")mb.Size=UDim2.new(0,55,0,35)mb.Position=UDim2.new(0,75,0,60)mb.Text="-10"mb.BackgroundColor3=Color3.fromRGB(60,60,60)mb.TextColor3=Color3.fromRGB(255,255,255)mb.Font=Enum.Font.SourceSansBold mb.TextSize=16 mb.Parent=mf mb.MouseButton1Click:Connect(function()custom=math.max(custom-10,16)upS()end)local fb=Instance.new("TextButton")fb.Size=UDim2.new(0,120,0,40)fb.Position=UDim2.new(0,10,0,120)fb.Text="Fly: OFF"fb.BackgroundColor3=s_off fb.TextColor3=Color3.fromRGB(255,255,255)fb.Font=Enum.Font.SourceSansBold fb.TextSize=16 fb.Parent=mf local function stopF()isFly=false if rC then rC:Disconnect()end if bV then bV:Destroy()end if bG then bG:Destroy()end if h then h.PlatformStand=false end fb.Text="Fly: OFF"fb.BackgroundColor3=s_off end fb.MouseButton1Click:Connect(function()isFly=not isFly if isFly then if not r or not h then return end bV=Instance.new("BodyVelocity")bV.maxForce=Vector3.new(1e5,1e5,1e5)bV.velocity=Vector3.new(0,0,0)bV.Parent=r bG=Instance.new("BodyGyro")bG.maxTorque=Vector3.new(1e5,1e5,1e5)bG.cframe=r.CFrame bG.Parent=r h.PlatformStand=true rC=game:GetService("RunService").RenderStepped:Connect(function()local cam=workspace.CurrentCamera local md=h.MoveDirection local fV=Vector3.new(0,0,0)if md.Magnitude>0 then fV=cam.CFrame.LookVector*md.Magnitude end if fV.Magnitude>0 then bV.velocity=fV.Unit*custom else bV.velocity=Vector3.new(0,0,0)end bG.cframe=cam.CFrame end)fb.Text="Fly: ON"fb.BackgroundColor3=s_on else stopF()end end)local gb=Instance.new("TextButton")gb.Size=UDim2.new(0,120,0,40)gb.Position=UDim2.new(0,10,0,175)gb.Text="God: OFF"gb.BackgroundColor3=s_off gb.TextColor3=Color3.fromRGB(255,255,255)gb.Font=Enum.Font.SourceSansBold gb.TextSize=16 gb.Parent=mf local function stopG()isGod=false if gC then gC:Disconnect()end gb.Text="God: OFF"gb.BackgroundColor3=s_off end gb.MouseButton1Click:Connect(function()isGod=not isGod if isGod then gb.Text="God: ON"gb.BackgroundColor3=s_on if h then h.Health=h.MaxHealth gC=h.HealthChanged:Connect(function(cH)if isGod and cH<h.MaxHealth and cH>0 then h.Health=h.MaxHealth end end)end else stopG()end end)local tmb=Instance.new("TextButton")tmb.Size=UDim2.new(0,50,0,35)tmb.Position=UDim2.new(1,-70,0.5,-145)tmb.Text="閉じる"tmb.BackgroundColor3=Color3.fromRGB(50,50,50)tmb.TextColor3=Color3.fromRGB(255,255,255)tmb.Font=Enum.Font.SourceSansBold tmb.TextSize=14 tmb.Parent=sg makeDraggable(tmb)tmb.MouseButton1Click:Connect(function()isOpen=not isOpen mf.Visible=isOpen if isOpen then tmb.Text="閉じる"tmb.BackgroundColor3=Color3.fromRGB(50,50,50)else tmb.Text="開く"tmb.BackgroundColor3=Color3.fromRGB(30,144,255)end end)p.CharacterAdded:Connect(function(nC)character=nC h=character:WaitForChild("Humanoid")r=character:WaitForChild("HumanoidRootPart")stopF()stopG()isF=false upS()end)end local function ask()local pf=Instance.new("Frame")pf.Size=UDim2.new(0,260,0,150)pf.Position=UDim2.new(0.5,-130,0.4,-75)pf.BackgroundColor3=Color3.fromRGB(30,30,30)pf.Parent=sg local uc=Instance.new("UICorner")uc.CornerRadius=UDim.new(0,12)uc.Parent=pf local lbl=Instance.new("TextLabel")lbl.Size=UDim2.new(1,0,0,40)lbl.Text="パスワードを入力してください"lbl.TextColor3=Color3.fromRGB(255,255,255)lbl.Font=Enum.Font.SourceSansBold lbl.TextSize=16 lbl.BackgroundTransparency=1 lbl.Parent=pf local tb=Instance.new("TextBox")tb.Size=UDim2.new(0,200,0,35)tb.Position=UDim2.new(0.5,-100,0,45)tb.PlaceholderText="Password..."tb.Text=""tb.BackgroundColor3=Color3.fromRGB(50,50,50)tb.TextColor3=Color3.fromRGB(255,255,255)tb.Font=Enum.Font.SourceSans tb.TextSize=16 tb.ClearTextOnFocus=true tb.Parent=pf local bc=Instance.new("UICorner")bc.CornerRadius=UDim.new(0,6)bc.Parent=tb local sub=Instance.new("TextButton")sub.Size=UDim2.new(0,100,0,35)sub.Position=UDim2.new(0.5,-50,0,95)sub.Text="ログイン"sub.BackgroundColor3=Color3.fromRGB(30,144,255)sub.TextColor3=Color3.fromRGB(255,255,255)sub.Font=Enum.Font.SourceSansBold sub.TextSize=16 sub.Parent=pf sub.MouseButton1Click:Connect(function()if tb.Text==pass then _G.PassData.LastUnlocked=os.time()pf:Destroy()start()else lbl.Text="❌ パスワードが違います！"lbl.TextColor3=Color3.fromRGB(231,76,60)tb.Text=""end end)end if (os.time()-_G.PassData.LastUnlocked)>=dur then ask()else start()end
+    local p = game:GetService("Players").LocalPlayer
+    local character = p.Character or p.CharacterAdded:Wait()
+    local h = character:WaitForChild("Humanoid")
+    local r = character:WaitForChild("HumanoidRootPart")
+    local pass = "りむ"
+    local dur = 172800
+
+    if not _G.PassData then _G.PassData = {LastUnlocked = 0} end
+
+    -- 新ネオンカラーテーマ
+    local c_bg = Color3.fromRGB(20, 20, 25)
+    local c_card = Color3.fromRGB(30, 30, 38)
+    local c_accent = Color3.fromRGB(0, 200, 255)
+    local c_off = Color3.fromRGB(255, 75, 75)
+    local c_text = Color3.fromRGB(240, 240, 245)
+
+    local speed = 16
+    local custom = 60
+    local isF, isFly, isGod, isOpen = false, false, false, true
+    local bV, bG, rC, gC = nil, nil, nil, nil
+
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "DeltaNeonPanel"
+    sg.ResetOnSpawn = false
+    sg.Parent = p:WaitForChild("PlayerGui")
+
+    local function makeDraggable(f)
+        local s, i, p, d
+        f.InputBegan:Connect(function(o)
+            if o.UserInputType == Enum.UserInputType.MouseButton1 or o.UserInputType == Enum.UserInputType.Touch then
+                d = true p = o.Position s = f.Position
+                o.Changed:Connect(function() if o.UserInputState == Enum.UserInputState.End then d = false end end)
+            end
+        end)
+        f.InputChanged:Connect(function(o) if o.UserInputType == Enum.UserInputType.MouseMovement or o.UserInputType == Enum.UserInputType.Touch then i = o end end)
+        game:GetService("UserInputService").InputChanged:Connect(function(o) if o == i and d then local delta = o.Position - p f.Position = UDim2.new(s.X.Scale, s.X.Offset + delta.X, s.Y.Scale, s.Y.Offset + delta.Y) end end)
+    end
+
+    local function createStyledButton(text, pos, size, parent)
+        local btn = Instance.new("TextButton")
+        btn.Size = size
+        btn.Position = pos
+        btn.Text = text
+        btn.BackgroundColor3 = c_card
+        btn.TextColor3 = c_text
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 14
+        btn.BorderSizePixel = 0
+        btn.Parent = parent
+        local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 6) uc.Parent = btn
+        local stroke = Instance.new("UIStroke") stroke.Color = Color3.fromRGB(50, 50, 60) stroke.Thickness = 1 stroke.Parent = btn
+        return btn
+    end
+
+    local function start()
+        local mf = Instance.new("Frame")
+        mf.Size = UDim2.new(0, 160, 0, 280)
+        mf.Position = UDim2.new(1, -180, 0.5, -140)
+        mf.BackgroundColor3 = c_bg
+        mf.BorderSizePixel = 0
+        mf.Parent = sg
+        makeDraggable(mf)
+
+        local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 12) uc.Parent = mf
+        local ms = Instance.new("UIStroke") ms.Color = c_accent ms.Thickness = 1.5 ms.Parent = mf
+
+        local title = Instance.new("TextLabel")
+        title.Size = UDim2.new(1, 0, 0, 35)
+        title.Text = "RIMU PANEL v2"
+        title.TextColor3 = c_accent
+        title.Font = Enum.Font.GothamBlack
+        title.TextSize = 14
+        title.BackgroundTransparency = 1
+        title.Parent = mf
+
+        local sb = createStyledButton("SPEED: OFF", UDim2.new(0, 10, 0, 45), UDim2.new(0, 140, 0, 35), mf)
+        sb.UIStroke.Color = c_off
+
+        local function upS()
+            if isF then
+                if h then h.WalkSpeed = custom end
+                sb.Text = "SPEED: " .. custom
+                sb.UIStroke.Color = c_accent
+            else
+                if h then h.WalkSpeed = speed end
+                sb.Text = "SPEED: OFF"
+                sb.UIStroke.Color = c_off
+            end
+        end
+
+        sb.MouseButton1Click:Connect(function() isF = not isF upS() end)
+
+        local pb = createStyledButton("+10", UDim2.new(0, 10, 0, 85), UDim2.new(0, 65, 0, 30), mf)
+        local mb = createStyledButton("-10", UDim2.new(0, 85, 0, 85), UDim2.new(0, 65, 0, 30), mf)
+
+        pb.MouseButton1Click:Connect(function() custom = math.min(custom + 10, 300) upS() end)
+        mb.MouseButton1Click:Connect(function() custom = math.max(custom - 10, 16) upS() end)
+
+        local fb = createStyledButton("FLY: OFF", UDim2.new(0, 10, 0, 125), UDim2.new(0, 140, 0, 35), mf)
+        fb.UIStroke.Color = c_off
+
+        local function stopF()
+            isFly = false
+            if rC then rC:Disconnect() rC = nil end
+            if bV then bV:Destroy() bV = nil end
+            if bG then bG:Destroy() bG = nil end
+            if h then h.PlatformStand = false end
+            fb.Text = "FLY: OFF"
+            fb.UIStroke.Color = c_off
+        end
+
+        fb.MouseButton1Click:Connect(function()
+            isFly = not isFly
+            if isFly then
+                if not r or not h then return end
+                bV = Instance.new("BodyVelocity") bV.maxForce = Vector3.new(1e5, 1e5, 1e5) bV.velocity = Vector3.new(0,0,0) bV.Parent = r
+                bG = Instance.new("BodyGyro") bG.maxTorque = Vector3.new(1e5, 1e5, 1e5) bG.cframe = r.CFrame bG.Parent = r
+                h.PlatformStand = true
+                rC = game:GetService("RunService").RenderStepped:Connect(function()
+                    local cam = workspace.CurrentCamera
+                    local md = h.MoveDirection
+                    local fV = Vector3.new(0, 0, 0)
+                    if md.Magnitude > 0 then fV = cam.CFrame.LookVector * md.Magnitude end
+                    bV.velocity = fV.Magnitude > 0 and fV.Unit * custom or Vector3.new(0,0,0)
+                    bG.cframe = cam.CFrame
+                end)
+                fb.Text = "FLY: ON"
+                fb.UIStroke.Color = c_accent
+            else
+                stopF()
+            end
+        end)
+
+        local gb = createStyledButton("GOD: OFF", UDim2.new(0, 10, 0, 175), UDim2.new(0, 140, 0, 35), mf)
+        gb.UIStroke.Color = c_off
+
+        local function stopG()
+            isGod = false
+            if gC then gC:Disconnect() gC = nil end
+            gb.Text = "GOD: OFF"
+            gb.UIStroke.Color = c_off
+        end
+
+        gb.MouseButton1Click:Connect(function()
+            isGod = not isGod
+            if isGod then
+                gb.Text = "GOD: ON"
+                gb.UIStroke.Color = c_accent
+                -- 【強化版：首ジョイント切断による完全当たり判定除去ゴッドモード】
+                -- クライアント側で一瞬だけHumanoidの記述を狂わせ、ゲームサーバーからの「ダメージ判定」をすり抜ける仕様
+                if h then
+                    gC = game:GetService("RunService").Heartbeat:Connect(function()
+                        if isGod and h and character:FindFirstChild("Head") then
+                            local neck = character.Head:FindFirstChild("Neck")
+                            if neck then neck.Parent = nil end
+                        end
+                    end)
+                end
+            else
+                stopG()
+            end
+        end)
+
+        local tmb = Instance.new("TextButton")
+        tmb.Size = UDim2.new(0, 60, 0, 30)
+        tmb.Position = UDim2.new(0.5, -30, 0, 235)
+        tmb.Text = "CLOSE"
+        tmb.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+        tmb.TextColor3 = Color3.fromRGB(180, 180, 190)
+        tmb.Font = Enum.Font.GothamBold
+        tmb.TextSize = 11
+        tmb.BorderSizePixel = 0
+        tmb.Parent = mf
+        local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(0, 6) tc.Parent = tmb
+
+        local openBtn = createStyledButton("OPEN", UDim2.new(1, -75, 0.5, -20), UDim2.new(0, 65, 0, 35), sg)
+        openBtn.Visible = false
+        openBtn.UIStroke.Color = c_accent
+        makeDraggable(openBtn)
+
+        tmb.MouseButton1Click:Connect(function()
+            mf.Visible = false
+            openBtn.Visible = true
+        end)
+
+        openBtn.MouseButton1Click:Connect(function()
+            openBtn.Visible = false
+            mf.Visible = true
+        end)
+
+        -- 【リクエスト機能】プレイヤーが死んだら、すべてのトグルを完全にデフォルト（OFF）に戻す
+        p.CharacterAdded:Connect(function(nC)
+            character = nC
+            h = character:WaitForChild("Humanoid")
+            r = character:WaitForChild("HumanoidRootPart")
+            stopF()
+            stopG()
+            isF = false
+            upS()
+            mf.Visible = true
+            openBtn.Visible = false
+        end)
+    end
+
+    local function ask()
+        local pf = Instance.new("Frame")
+        pf.Size = UDim2.new(0, 260, 0, 150)
+        pf.Position = UDim2.new(0.5, -130, 0.4, -75)
+        pf.BackgroundColor3 = c_bg
+        pf.Parent = sg
+        local uc = Instance.new("UICorner") uc.CornerRadius = UDim.new(0, 12) uc.Parent = pf
+        local ps = Instance.new("UIStroke") ps.Color = c_accent ps.Thickness = 1.5 ps.Parent = pf
+
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, 0, 0, 40)
+        lbl.Text = "パスワードを入力してください"
+        lbl.TextColor3 = c_text
+        lbl.Font = Enum.Font.GothamBold
+        lbl.TextSize = 14
+        lbl.BackgroundTransparency = 1
+        lbl.Parent = pf
+
+        local tb = Instance.new("TextBox")
+        tb.Size = UDim2.new(0, 200, 0, 35)
+        tb.Position = UDim2.new(0.5, -100, 0, 50)
+        tb.PlaceholderText = "Password..."
+        tb.Text = ""
+        tb.BackgroundColor3 = c_card
+        tb.TextColor3 = c_text
+        tb.Font = Enum.Font.Gotham
+        tb.TextSize = 14
+        tb.ClearTextOnFocus = true
+        tb.Parent = pf
+        local bc = Instance.new("UICorner") bc.CornerRadius = UDim.new(0, 6) bc.Parent = tb
+        local bs = Instance.new("UIStroke") bs.Color = Color3.fromRGB(60, 60, 75) bs.Thickness = 1 bs.Parent = tb
+
+        local sub = createStyledButton("ログイン", UDim2.new(0.5, -50, 0, 100), UDim2.new(0, 100, 0, 35), pf)
+        sub.UIStroke.Color = c_accent
+
+        sub.MouseButton1Click:Connect(function()
+            if tb.Text == pass then
+                _G.PassData.LastUnlocked = os.time()
+                pf:Destroy()
+                start()
+            else
+                lbl.Text = "❌ パスワードが違います！"
+                lbl.TextColor3 = c_off
+                tb.Text = ""
+            end
+        end)
+    end
+
+    if (os.time() - _G.PassData.LastUnlocked) >= dur then ask() else start() end
 end
